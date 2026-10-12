@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { MongoClient } = require('mongodb');   //class
+const { MongoClient, ObjectId } = require('mongodb');   //class
 const app = express();
 const port = 3000;
 const client = new MongoClient(process.env.MONGO_URI); //object
@@ -41,6 +41,42 @@ app.post('/api/data', (req, res) => {
     testdb.collection("data").insertOne(req.body);
 
     res.json({ message: "successfully saved data" });
+});
+
+app.delete('/api/data/:id', async(req, res) =>{
+    const id = req.params.id;
+
+    const result= await testdb.collection("data").deleteOne({_id:new ObjectId(id)});
+    if(result.deletedCount ===0 ){
+        return res.status(404).json({message:"document not found"});
+    }else{
+   
+    res.json(result);
+    }
+});
+
+app.put('/api/data/:id' ,async (req,res) => {
+
+    const id=req.params.id;
+
+    const result = await testdb.collection("data").updateOne({
+        _id: new ObjectId(id)},
+        {$set:req.body }
+    );
+    if(result.matchedCount ===0 ){
+        return res.status(404).json({message:"document not found"});
+    } else {
+   
+    res.json(result);}
+
+    });
+
+app.patch('/api/data/:id',async (req,res)=>{
+     const id=req.params.id;
+
+    const result = await testdb.collection("data").updateOne({_id: new ObjectId(id)},
+        {$set:req.body }
+);res.json(result);
 });
 
 app.listen(port, () => {
